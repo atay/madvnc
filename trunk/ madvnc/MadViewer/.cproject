@@ -141,6 +141,7 @@
 <pathentry base-path="C:/Qt/4.5.1/include" include="QtXml" kind="inc" path="" system="true"/>
 <pathentry base-path="C:/Qt/4.5.1/include" include="QtXmlPatterns" kind="inc" path="" system="true"/>
 <pathentry include="C:/MinGW/include" kind="inc" path="" system="true"/>
+<pathentry include="C:/MinGW/include/c++/3.4.2" kind="inc" path="" system="true"/>
 <pathentry kind="src" path=""/>
 <pathentry kind="out" path=""/>
 </storageModule>

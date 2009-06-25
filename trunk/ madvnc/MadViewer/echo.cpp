@@ -6,8 +6,9 @@
  */
 #include <QtGui>
 #include <QtNetwork>
-#include <stdio.h>
+#include <QtDebug>
 #include "echo.h"
+#include <iostream>
 
 Echo::Echo(QWidget *parent) :
 	QDialog(parent) {
@@ -24,55 +25,84 @@ Echo::Echo(QWidget *parent) :
 	buttons->addWidget(startButton);
 	buttons->addWidget(sendButton);
 	label = new QLabel;
-	label->setMinimumSize(300,300);
-	label->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+	label->setMinimumSize(300, 300);
+	label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	log = new QLabel;
 	log->setText("App started");
-	connect(startButton,SIGNAL(clicked()),this,SLOT(startConnection()));
-	connect(&server,SIGNAL(newConnection()),this,SLOT(prepareClient()));
-	connect(&socket,SIGNAL(readyRead()),this,SLOT(drawWindow()));
+	connect(startButton, SIGNAL(clicked()), this, SLOT(startConnection()));
+	connect(&server, SIGNAL(newConnection()), this, SLOT(prepareClient()));
+	connect(&socket, SIGNAL(readyRead()), this, SLOT(drawWindow()));
 	QVBoxLayout *layout = new QVBoxLayout;
 	layout->addWidget(label);
 	layout->addWidget(log);
 	layout->addLayout(buttons);
 	setLayout(layout);
 	setFixedHeight(sizeHint().height());
+	nextBlock = 0;
 }
 void Echo::startConnection() {
 	socket.connectToHost(QHostAddress::LocalHost, 7777);
 }
 
-
 void Echo::prepareClient() {
 	client = server.nextPendingConnection();
 	sendButton->setEnabled(true);
-	connect(sendButton,SIGNAL(clicked()),this,SLOT(sendWindow()));
+	connect(sendButton, SIGNAL(clicked()), this, SLOT(sendWindow()));
 	server.close();
 
 }
-void Echo::sendWindow(){
-	QPixmap qpix = QPixmap::grabWindow(QApplication::desktop()->winId()).scaled(label->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+void Echo::sendWindow() {
+	QPixmap qpix =
+			QPixmap::grabWindow(QApplication::desktop()->winId()).scaled(
+					label->size(), Qt::KeepAspectRatio,
+					Qt::SmoothTransformation);
 
-	QDataStream stream(client);
-	stream << qpix;
-	log->setText("Windows send");
+	if (qpix.height() > 0) {
+		QByteArray block;
+
+		QDataStream out(&block, QIODevice::WriteOnly);
+		out.setVersion(QDataStream::Qt_4_1);
+
+		out << quint16(0);
+		out << qpix;
+		out.device()->seek(0);
+		out << quint16(block.size() - sizeof(quint16));
+		client->write(block);
+		log->setText("Windows send");
+
+	} else
+		log->setText("Windows not send");
 }
 
-void Echo::drawWindow(){
+void Echo::drawWindow() {
 	QPixmap qpix;
 	QByteArray array;
 	QDataStream stream(&socket);
+	stream.setVersion(QDataStream::Qt_4_1);
+	QString temp;
+
+
+
+	if (nextBlock == 0) {
+		temp = nextBlock;
+
+		if (socket.bytesAvailable() < sizeof(quint16))
+			return;
+		stream >> nextBlock;
+		temp = nextBlock;
+		log->setText(temp);
+	}
+	if (socket.bytesAvailable() < nextBlock)
+		return;
 
 	stream >> qpix;
 
-	QString temp;
-	if (array.size()==0)
-		temp="array is empty";
+	if (qpix.height() < 1)
+		temp = "blalba";
 	else
-		temp=array.size();
-
+		temp = QString::number(qpix.height());
 
 	log->setText(temp);
 	label->setPixmap(qpix);
-
+	nextBlock = 0;
 }

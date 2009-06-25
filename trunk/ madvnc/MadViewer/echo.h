@@ -40,6 +40,7 @@ private:
 	QTcpServer server;
 	QLabel *label;
 	QLabel *log;
+	quint16 nextBlock;
 
 
 };
