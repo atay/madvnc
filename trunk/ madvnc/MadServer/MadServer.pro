@@ -1,13 +1,15 @@
 TEMPLATE = app
-CONFIG   += console
-CONFIG   -= app_bundle
+CONFIG += console
+CONFIG -= app_bundle
 TARGET = MadServer
 QT += core \
     gui \
     network
-HEADERS += MadPix.h \
+HEADERS += ScreenShooter.h \
+    MadPix.h \
     MadServer.h
-SOURCES += MadPix.cpp \
+SOURCES += ScreenShooter.cpp \
+    MadPix.cpp \
     MadServer.cpp \
     main.cpp
 FORMS += 

@@ -12,27 +12,22 @@ MadPix::MadPix() {
 
 	stopped = false;
 	qDebug("MadPix created");
-	connect(this,SIGNAL(makePix()),this,SLOT(makeScreenshot()));
-
 }
+
 void MadPix::grab() {
 	start();
+	screenShoter->timer.start();
 	qDebug("grab started");
 }
-void MadPix::makeScreenshot(){
-	pixmap = QPixmap::grabWindow(QApplication::desktop()->winId()).scaled(
-			QSize(300, 300), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+void MadPix::preparePixmap(QPixmap pixmap){
+	emit sendPix(pixmap);
 }
-
 void MadPix::run() {
-	while (!stopped) {
-		emit makePix();
-		sleep(1);
 
-		emit sendPix(pixmap);
+	connect(screenShoter,SIGNAL(newPixmap(QPixmap)),this,SLOT(preparePixmap(QPixmap)));
 
-		qDebug("sendPix emited");
-	}
+	exec();
 }
 
 void MadPix::stop() {
