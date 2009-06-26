@@ -1,11 +1,11 @@
 #include <QApplication>
-
-#include "echo.h"
+#include "MadSocket.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Echo *echo = new Echo;
+    MadSocket madsocket;
+    qDebug("test");
+    madsocket.show();
 
-    echo->show();
     return a.exec();
 }
