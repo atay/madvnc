@@ -10,7 +10,6 @@
 
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QObject>
 #include <QPixmap>
 
 class QTcpServer;
@@ -23,7 +22,7 @@ public:
 
 public slots:
 	void prepareClient();
-	void sendWindow(QPixmap &qpix );
+	void sendWindow(QPixmap qpix );
 
 
 signals:

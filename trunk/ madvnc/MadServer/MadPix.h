@@ -21,9 +21,11 @@ public:
 
 public slots:
 	void grab();
+	void makeScreenshot();
 
 signals:
-	void sendPix(QPixmap &pixmap);
+	void sendPix(QPixmap pixmap);
+	void makePix();
 
 private:
 	QPixmap pixmap;

@@ -1,4 +1,6 @@
 TEMPLATE = app
+CONFIG   += console
+CONFIG   -= app_bundle
 TARGET = MadServer
 QT += core \
     gui \
