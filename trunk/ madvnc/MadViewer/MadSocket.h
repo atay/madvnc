@@ -19,10 +19,17 @@ class QTcpSocket;
 class QLabel;
 
 class MadSocket: public QDialog {
-Q_OBJECT
+
+	Q_OBJECT
 
 public:
 	MadSocket(QWidget *parent = 0);
+	void MadSocket::mousePressEvent(QMouseEvent *event);
+	void MadSocket::mouseReleaseEvent(QMouseEvent *event);
+	void MadSocket::mouseMoveEvent(QMouseEvent *event);
+	void MadSocket::wheelEvent(QWheelEvent *event);
+	void MadSocket::keyPressEvent(QKeyEvent * event);
+
 
 public slots:
 	void startConnection();
@@ -30,13 +37,11 @@ public slots:
 	//void send();
 
 private:
-	QPushButton *startButton,*sendButton;
+	QPushButton *startButton, *sendButton, *stopButton;
 	QTcpSocket socket;
 	QLabel *label;
 	quint16 nextBlock;
-
-
+	bool pressed;
 };
-
 
 #endif /* MADSOCKET_H_ */
