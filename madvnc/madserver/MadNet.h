@@ -25,10 +25,11 @@ protected:
 public slots:
 	void prepareClient();
 	void sendBuffer(QByteArray*);
-
+	void bytesWrite(qint64);
 
 signals:
 	void connectionStart();
+	
 
 
 private:

@@ -18,7 +18,7 @@ void MadShooter::makeScreenShot(){
 
 
 	img = QPixmap::grabWindow(QApplication::desktop()->winId()).scaled(
-                        QSize(800, 500), Qt::KeepAspectRatio, Qt::SmoothTransformation).toImage().convertToFormat(QImage::Format_RGB16,Qt::AvoidDither|Qt::ThresholdDither);
+                        QSize(1280, 800), Qt::KeepAspectRatio, Qt::SmoothTransformation).toImage().convertToFormat(QImage::Format_RGB16,Qt::AvoidDither|Qt::ThresholdDither);
 	
 	quint16 lines2send;
 	buffer= new QByteArray();
