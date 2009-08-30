@@ -10,17 +10,21 @@
 
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QThread>
 
-
-class MadNet: public QObject{
+class QThread;
+class MadNet: public QThread{
 Q_OBJECT
 
 public:
 	MadNet(QObject *parent = 0);
 
+protected:
+	void run();
+
 public slots:
 	void prepareClient();
-	void sendBuffer(QByteArray&);
+	void sendBuffer(QByteArray*);
 
 
 signals:

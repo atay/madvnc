@@ -2,15 +2,15 @@
 
 MadServer::MadServer(){
 	
-	timer.setInterval(25);
+	timer.setInterval(20);
 	timer.setSingleShot(false);
-
-	connect(&timer,SIGNAL(timeout()),&madShoter,SLOT(makeScreenShot()));
-	connect(&madShoter,SIGNAL(newScreen(QImage)),&madWorker,SLOT(getScreen(QImage)));
-	connect(&madWorker,SIGNAL(sendBuffer(QByteArray &)),&madNet,SLOT(sendBuffer(QByteArray &)));	
+	//madWorker.start();
+	//madNet.start();
+	connect(&timer,SIGNAL(timeout()),&madShooter,SLOT(makeScreenShot()));
+	connect(&madShooter,SIGNAL(sendBuffer(QByteArray*)),&madNet,SLOT(sendBuffer(QByteArray*)),Qt::QueuedConnection);	
 	
 	QObject::connect(&madNet,SIGNAL(connectionStart()),this,SLOT(startGrab()));
-
+	
 
 }
 
