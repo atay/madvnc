@@ -37,7 +37,7 @@ QDialog(parent) {
 	setLayout(layout);
 	setFixedHeight(sizeHint().height());
 	nextBlock = 0;
-	img = QImage(800,500,QImage::Format_RGB16);	
+	img = QImage(1280,800,QImage::Format_RGB16);	
 }
 
 void MadSocket::startConnection() {
@@ -81,8 +81,7 @@ void MadSocket::drawWindow() {
 		}
 	}
 
-	label->setPixmap(QPixmap::fromImage(img).scaled(
-                        QSize(1280, 800), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	label->setPixmap(QPixmap::fromImage(img));
 	nextBlock = 0;
 
 }

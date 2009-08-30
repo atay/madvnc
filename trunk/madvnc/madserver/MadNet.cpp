@@ -16,19 +16,22 @@ MadNet::MadNet(QObject * parent){
 void MadNet::run(){
 	exec();
 }
-
+void MadNet::bytesWrite(qint64 size){
+	qDebug() << size;
+}
 void MadNet::prepareClient() {
 	client = server.nextPendingConnection();
 	server.close();
 	emit connectionStart();
+	connect(client,SIGNAL(bytesWritten(qint64)),this,SLOT(bytesWrite(qint64)));
 	qDebug() << "connected";
 }
 
 void MadNet::sendBuffer(QByteArray *buffer) {
+		
 
-
-		int result=client->write(*buffer);
-
+	int result=client->write(buffer->data(),buffer->size());
+	qDebug() << result;
 		//if (result==-1) emit error();
 		//  emit sendDone();
 		delete buffer;
