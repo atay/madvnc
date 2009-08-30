@@ -7,27 +7,29 @@
 
 #ifndef MADSHOOTER_H_
 #define MADSHOOTER_H_
-#include <QObject>
+#include <QThread>
 #include <QPixmap>
 
-class MadShoter: public QObject{
+class MadShooter: public QThread{
 Q_OBJECT
 public:
-	MadShoter();
-
+	MadShooter();
+	static const qint16 ALL_PIC=1000000;
 
 private slots:
 	void makeScreenShot();
-
+protected:
+	void run();
 
 signals:
-	void newScreen(QImage);
+	void sendBuffer(QByteArray*);
 
 public:
 	
 private:
-	QImage img;
-	bool ready;
+	QImage img,oldimg;
+	
+	QByteArray *buffer;
 };
 
 #endif /* MADSHOOTER_H_ */

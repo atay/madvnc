@@ -7,26 +7,27 @@
 
 #ifndef MADWORKER_H_
 #define MADWORKER_H_
-#include <QObject>
+#include <QThread>
 #include <QImage>
 
+class QThread;
 
-
-class MadWorker: public QObject {
+class MadWorker: public QThread {
 Q_OBJECT
 
 public:
-	static const qint16 ALL_PIC=1000000;
+	
 	MadWorker();
 
+	void run();
 public slots:
 	void getScreen(QImage);
 
 signals:
-	void sendBuffer(QByteArray &);
+	
 
 private:
-	QImage oldimg;
+
 
 };
 
