@@ -8,8 +8,9 @@
 #ifndef MADNET_H_
 #define MADNET_H_
 
-#include <QTcpServer>
+
 #include <QTcpSocket>
+#include <QTcpServer>
 #include <QThread>
 
 class QThread;
@@ -29,7 +30,7 @@ public slots:
 
 signals:
 	void connectionStart();
-	
+
 
 
 private:
