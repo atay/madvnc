@@ -37,7 +37,7 @@ QDialog(parent) {
 	setLayout(layout);
 	setFixedHeight(sizeHint().height());
 	nextBlock = 0;
-	img = QImage(1280,800,QImage::Format_RGB16);	
+	img = QImage(1280,800,QImage::Format_RGB32);	
 }
 
 void MadSocket::startConnection() {
@@ -47,7 +47,7 @@ void MadSocket::startConnection() {
 }
 
 void MadSocket::drawWindow() {
-	quint16 lines2read,line;
+	quint16 type,line;
 	uint bytesperline;
 	QByteArray buffer;
 	char *temp;
@@ -63,14 +63,14 @@ void MadSocket::drawWindow() {
 	if (socket.bytesAvailable() < nextBlock)
 		return;
 	
-	stream >> lines2read;
+	stream >> type;
 
-	if (lines2read==ALL_PIC){
-		len=uint(nextBlock);
-		stream.readBytes(temp,len);
-		memcpy(img.bits(),temp,len);
-		delete [] temp;
-	} else {
+	if (type==ALL_PIC){
+		
+		stream >> img;
+		
+		
+	}/* else {
 		stream >> bytesperline;
 		for (int i=0;i<lines2read;i++){
 			stream >> line;
@@ -80,7 +80,7 @@ void MadSocket::drawWindow() {
 
 		}
 	}
-
+*/
 	label->setPixmap(QPixmap::fromImage(img));
 	nextBlock = 0;
 

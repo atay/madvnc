@@ -15,9 +15,15 @@ Q_OBJECT
 public:
 	MadShooter();
 	static const qint16 ALL_PIC=1000000;
+	static const int WIDTH=1280;
+	static const int HEIGHT=800;
+	static const int PODZIAL=8;
+	static const int BPP=4;
 
-private slots:
+
+public slots:
 	void makeScreenShot();
+	void showcount();
 protected:
 	void run();
 
@@ -27,8 +33,9 @@ signals:
 public:
 	
 private:
-	QImage img,oldimg;
-	
+	int count;
+	QImage img,oldimg,tempimg;
+	volatile bool stop;
 	QByteArray *buffer;
 };
 

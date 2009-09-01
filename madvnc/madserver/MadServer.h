@@ -31,7 +31,7 @@ signals:
 private:
 	MadShooter madShooter;
 	MadNet madNet;
-	QTimer timer;
+	QTimer timer,testt;
 
 };
 

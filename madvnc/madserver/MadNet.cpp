@@ -30,7 +30,7 @@ void MadNet::prepareClient() {
 void MadNet::sendBuffer(QByteArray *buffer) {
 		
 
-	int result=client->write(buffer->data(),buffer->size());
+	int result=client->write(*buffer);
 	qDebug() << result;
 		//if (result==-1) emit error();
 		//  emit sendDone();
