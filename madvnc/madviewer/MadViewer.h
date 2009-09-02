@@ -12,13 +12,17 @@ public:
 
 	static const qint16 ALL_PIC=1000000;
 	MadViewer(QWidget *parent = 0);
+        void MadViewer::mousePressEvent(QMouseEvent *event);
+        void MadViewer::mouseReleaseEvent(QMouseEvent *event);
+        void MadViewer::mouseMoveEvent(QMouseEvent *event);
+        void MadViewer::wheelEvent(QWheelEvent *event);
+        void MadViewer::keyPressEvent(QKeyEvent * event);
 
 public slots:
 
-	void startConnection();
+        void manageConnection();
 	void enableConnectButton();
-	void changeConnectButton();
-	void drawWindow();
+        void drawWindow();
 	//void send();
 
 private:
@@ -28,6 +32,7 @@ private:
 	QTcpSocket socket;
 	quint64 nextBlock;
 	QImage img;
+        bool pressed;
 
 };
 
