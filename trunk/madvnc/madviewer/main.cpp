@@ -1,12 +1,15 @@
+#include <QtCore>
 #include <QApplication>
-#include "MadSocket.h"
+#include "MadViewer.h"
+
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MadSocket madsocket;
-    qDebug("test");
-    madsocket.show();
+	qDebug("madviewer -> application started..");
 
-    return a.exec();
+	QApplication app(argc, argv);
+	MadViewer madViewer;
+	madViewer.show();
+
+	return app.exec();
 
 }
