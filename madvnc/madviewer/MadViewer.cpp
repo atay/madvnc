@@ -31,7 +31,10 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     mainViewLabel->setMinimumSize(800,600);
     //mainViewLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    connect(&socket, SIGNAL(readyRead()), this, SLOT(drawWindow()));
+    connect(&socket,    SIGNAL(readyRead()),    this,   SLOT(drawWindow()));
+    connect(&socket,    SIGNAL(statechanged()), this,   SLOT(manageConnection()));
+    //connect(&socket,    SIGNAL(error()),        this,   SLOT(manageConnection()));
+    //connect(&socket,    SIGNAL(disconected()),  this,   SLOT(manageConnection()));
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mainViewLabel);
@@ -45,9 +48,11 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     img = QImage(800,600,QImage::Format_RGB16);
 }
 
+
+
 void MadViewer::manageConnection() {
 
-    if(socket.state()==0)
+    if(socket.state()==0)   // disconnected
     {
         connectButton->setEnabled(false);
         addressEdit->setEnabled(false);
