@@ -1,19 +1,21 @@
 #include <QtGui>
 #include <QtNetwork>
-//#include <QTest>
 #include "MadViewer.h"
 
 MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
 
-    connectButton = new QPushButton(tr("Connect"));
-    connectButton->setEnabled(true);
+    madNet.start();
+    isConnected = false;
+
+    connectButton = new QPushButton("Connect");
+    connectButton->setEnabled(true);    // odblokowany bo startujemy z wypelnionym polem adresu
     connectButton->setDefault(true);
 
-    exitButton = new QPushButton(tr("Exit"));
+    exitButton = new QPushButton("E&xit");
     exitButton->setEnabled(true);
 
-    addressEdit = new QLineEdit("1.1.1.1");
-    addressLabel = new QLabel(tr("&Adres MadServer'a:"));
+    addressEdit = new QLineEdit("localhost");
+    addressLabel = new QLabel("MadServer &aadress :");
     addressLabel->setBuddy(addressEdit);
 
     QHBoxLayout *controls = new QHBoxLayout;
@@ -24,17 +26,16 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     controls->addWidget(exitButton);
 
     connect(addressEdit, SIGNAL(textChanged(const QString &)), this, SLOT(enableConnectButton()));
-    connect(connectButton, SIGNAL(clicked()), this, SLOT(manageConnection()));
+    connect(connectButton, SIGNAL(clicked()), this, SLOT( manageClicked() ));
     connect(exitButton, SIGNAL(clicked()), this , SLOT(close() ) );
 
     mainViewLabel = new QLabel(tr("Welcome in MADVNC program.."));
     mainViewLabel->setMinimumSize(800,600);
-    //mainViewLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    connect(&socket,    SIGNAL(readyRead()),    this,   SLOT(drawWindow()));
-    connect(&socket,    SIGNAL(statechanged()), this,   SLOT(manageConnection()));
-    //connect(&socket,    SIGNAL(error()),        this,   SLOT(manageConnection()));
-    //connect(&socket,    SIGNAL(disconected()),  this,   SLOT(manageConnection()));
+    connect(&madNet.socket, SIGNAL(readyRead()),     this, SLOT(drawImage()));
+    connect(&madNet.socket, SIGNAL(connected()),     this, SLOT(connectedToServer()));
+    connect(&madNet.socket, SIGNAL(disconnected()),  this, SLOT(disconnectedFromServer()));
+    //connect(&madNet.socket, SIGNAL(error(SocketError &)),this, SLOT(connectionError(QAbstractSocket::SocketError socketError)));
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mainViewLabel);
@@ -48,33 +49,31 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     img = QImage(800,600,QImage::Format_RGB16);
 }
 
+void MadViewer::disconnectedFromServer(){
+    mainViewLabel->setText("Connection finished..");
+    connectButton->setText("Connect");
+    isConnected = false;
+}
+void MadViewer::connectedToServer(){
+    qDebug("connected");
+    mainViewLabel->setText("Connection estabilished..");
+    connectButton->setText("Disconnect");
+    //connectButton->setEnabled(true);
+    isConnected = true;
+}
 
-
-void MadViewer::manageConnection() {
-
-    if(socket.state()==0)   // disconnected
+void MadViewer::manageClicked() {
+    if(!isConnected)
     {
-        connectButton->setEnabled(false);
-        addressEdit->setEnabled(false);
-        socket.connectToHost(addressEdit->text(), 7777);
+        //connectButton->setEnabled(false);
+        qDebug("connecting..");
         mainViewLabel->setText("Connecting to " + addressEdit->text());
-        if (socket.waitForConnected(1000))
-        {
-            mainViewLabel->setText("Connected!");
-        }
-        else
-        {
-            mainViewLabel->setText("Connection failed.. Check address and try again.");
-        }
-        connectButton->setEnabled(true);
+        madNet.connect(addressEdit->text());
     }
     else
-        //        if(socket.state()== 3)
     {
-        socket.close();
-        mainViewLabel->setText("Connection closed by user..");
-        connectButton->setText("Connect");
-        addressEdit->setReadOnly(true);
+        qDebug("disconnecting..");
+        madNet.disconnect();
     }
 }
 
@@ -83,22 +82,22 @@ void MadViewer::enableConnectButton() {
     connectButton->setEnabled( !addressEdit->text().isEmpty() );
 }
 
-void MadViewer::drawWindow() {
+void MadViewer::drawImage() {
 
     quint16 lines2read,line;
     uint bytesperline;
     QByteArray buffer;
     char *temp;
     uint len;
-    QDataStream stream(&socket);
+    QDataStream stream(&madNet.socket);//&socket);
     stream.setVersion(QDataStream::Qt_4_1);
 
     if (nextBlock == 0) {
-        if (socket.bytesAvailable() < sizeof(quint64))
+        if (madNet.socket.bytesAvailable() < sizeof(quint64))
             return;
         stream >> nextBlock;
     }
-    if (socket.bytesAvailable() < nextBlock)
+    if (madNet.socket.bytesAvailable() < nextBlock)
         return;
 
     stream >> lines2read;
@@ -140,7 +139,6 @@ void MadViewer::mousePressEvent(QMouseEvent *event)
 void MadViewer::wheelEvent(QWheelEvent *event)
 {
     qDebug("SCROLL: %d", event->delta());
-
 }
 
 void MadViewer::mouseReleaseEvent(QMouseEvent *event)

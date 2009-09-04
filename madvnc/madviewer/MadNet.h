@@ -2,33 +2,28 @@
 #define MADNET_H
 
 #include <QTcpSocket>
-#include <QTcpServer>
 #include <QThread>
 
-class QThread;
+//class QThread;
 class MadNet: public QThread{
-Q_OBJECT
+
+    Q_OBJECT
 
 public:
-        MadNet(QObject *parent = 0);
-
-protected:
-        void run();
-
-public slots:
-        void prepareClient();
-        void sendCommands(QByteArray*);
-        void bytesWrite(qint64);
-
-signals:
-        void connectionStart();
-
-
+    MadNet(QObject *parent = 0);
+    QTcpSocket socket;
 
 private:
 
-        QTcpSocket *client;
-        QTcpServer server;
+protected:
+    void run();
+
+public slots:
+
+    //void sendControls(QByteArray*);
+
+    void connect(QString);
+    void disconnect();
 
 };
 
