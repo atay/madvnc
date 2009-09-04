@@ -10,6 +10,6 @@ CONFIG += CONSOLE qtestlib
 QT += core network
 
 # Input
-HEADERS += MadViewer.h
-SOURCES += MadViewer.cpp main.cpp
+HEADERS += MadViewer.h MadNet.h
+SOURCES += MadViewer.cpp MadNet.cpp main.cpp
 
