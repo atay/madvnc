@@ -13,12 +13,12 @@
 #include <QTcpServer>
 #include <QThread>
 
-class QThread;
-class MadNet: public QThread{
+
+class MadNet: public QObject{
 Q_OBJECT
 
 public:
-	MadNet(QObject *parent = 0);
+	MadNet();
 
 protected:
 	void run();

@@ -11,6 +11,7 @@
 #include "MadNet.h"
 #include "MadWorker.h"
 #include "MadShooter.h"
+#include "MadThread.h"
 #include <QTimer>
 
 
@@ -24,14 +25,16 @@ public:
 
 public slots:
 	void startGrab();
+	void stats();
 
 signals:
 	
 
 private:
-	MadShooter madShooter;
-	MadNet madNet;
-	QTimer timer;
+	MadShooter *madShooter;
+	MadNet *madNet;
+	QTimer timer,timer1;
+	MadThread thread1,thread2;
 
 };
 
