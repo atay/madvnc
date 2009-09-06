@@ -19,9 +19,6 @@ protected:
     void run();
 
 public slots:
-
-    //void sendControls(QByteArray*);
-
     void connect(QString);
     void disconnect();
 
