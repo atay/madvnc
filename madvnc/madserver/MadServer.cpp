@@ -18,7 +18,7 @@ MadServer::MadServer(){
 
 void MadServer::startGrab(){
 	timer.start();
-}
+
 	timer1.start();
 }
 void MadServer::stats(){
