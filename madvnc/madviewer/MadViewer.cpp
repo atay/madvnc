@@ -15,7 +15,7 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     exitButton->setEnabled(true);
 
     addressEdit = new QLineEdit("localhost");
-    addressLabel = new QLabel("MadServer &aadress :");
+    addressLabel = new QLabel("MadServer &address :");
     addressLabel->setBuddy(addressEdit);
 
     QHBoxLayout *controls = new QHBoxLayout;
@@ -32,11 +32,6 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     mainViewLabel = new QLabel(tr("Welcome in MADVNC program.."));
     mainViewLabel->setMinimumSize(800,600);
 
-    connect(&madNet.socket, SIGNAL(readyRead()),     this, SLOT(drawImage()));
-    connect(&madNet.socket, SIGNAL(connected()),     this, SLOT(connectedToServer()));
-    connect(&madNet.socket, SIGNAL(disconnected()),  this, SLOT(disconnectedFromServer()));
-    //connect(&madNet.socket, SIGNAL(error(SocketError &)),this, SLOT(connectionError(QAbstractSocket::SocketError socketError)));
-
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mainViewLabel);
     layout->addLayout(controls);
@@ -45,8 +40,14 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     setFixedHeight(sizeHint().height());
     setFixedWidth(sizeHint().width());
 
+    connect(&madNet.socket, SIGNAL(readyRead()),     this, SLOT(drawImage()));
+    connect(&madNet.socket, SIGNAL(connected()),     this, SLOT(connectedToServer()));
+    connect(&madNet.socket, SIGNAL(disconnected()),  this, SLOT(disconnectedFromServer()));
+    //connect(&madNet.socket, SIGNAL(error(SocketError &)),this, SLOT(connectionError(QAbstractSocket::SocketError socketError)));
+
     nextBlock = 0;
     img = QImage(800,600,QImage::Format_RGB16);
+
 }
 
 void MadViewer::disconnectedFromServer(){
@@ -82,6 +83,8 @@ void MadViewer::enableConnectButton() {
     connectButton->setEnabled( !addressEdit->text().isEmpty() );
 }
 
+// --- obraz
+
 void MadViewer::drawImage() {
 
     quint16 lines2read,line;
@@ -89,11 +92,11 @@ void MadViewer::drawImage() {
     QByteArray buffer;
     char *temp;
     uint len;
-    QDataStream stream(&madNet.socket);//&socket);
+    QDataStream stream(&madNet.socket);
     stream.setVersion(QDataStream::Qt_4_1);
 
     if (nextBlock == 0) {
-        if (madNet.socket.bytesAvailable() < sizeof(quint64))
+        if (madNet.socket.bytesAvailable() < sizeof(qint64))
             return;
         stream >> nextBlock;
     }
@@ -123,9 +126,34 @@ void MadViewer::drawImage() {
 
 }
 
+// --- mysz i klawiatura
+
+void MadViewer::sendControls(quint16 command){
+
+    QByteArray controls;
+    QDataStream controlStream(&controls, QIODevice::ReadWrite);
+    controlStream.setVersion(QDataStream::Qt_4_1);
+
+    //controlStream << (quint16)0;
+    controlStream << (quint16)command;
+
+
+    //controlStream.device()->reset();
+    //controlStream << (quint16)(controls.size() - sizeof(quint16));
+    QTcpSocket * serwer = &madNet.socket;
+    serwer->write(controls.data(), controls.size());
+
+}
+
 void MadViewer::keyPressEvent(QKeyEvent* event)
 {
-    qDebug("key: %d", event->key());
+    if(!isConnected) {
+        QWidget::keyPressEvent(event);
+        return;
+    }
+    qDebug() << "key: " << event->text();
+    sendControls(event->key());
+
 }
 
 void MadViewer::mousePressEvent(QMouseEvent *event)
@@ -151,6 +179,36 @@ void MadViewer::mouseReleaseEvent(QMouseEvent *event)
 
 void MadViewer::mouseMoveEvent(QMouseEvent *event)
 {
-    if (pressed)
-        qDebug("Moving at: (%d x %d)", event->x(), event->y());
+       qDebug("Moving at: (%d x %d)", event->x(), event->y());
+       sendControls(event->x());
+
 }
+
+
+
+/*
+
+  proponuje taki protokol sterowania:
+
+sendControls(quint16 eventType, quint16 eventData1, quint16 eventData2)
+
+ruch myszy:
+    eventType   1
+    eventData1  polozenieX ( >= 0 )
+    eventData2  polozenieY ( >= 0 )
+
+klikniecie:
+    eventType   2
+    eventData1  1 - lewy przycisk, 2 - prawy przycisk itd..
+    eventData2  1 - wcisniecie, 2 - zwolnienie
+
+obrot kolka:
+    eventType   1
+    eventData1  kierunek (1 - gora, 2 - dol)
+    eventData2  ilosc (zwykle jest 120 na jeden skok kolka)
+
+klawiatura:
+    eventType   1
+    eventData1  kod klawisza (event->key)
+    eventData2  1 - wcisniecie 2- zwolnienie
+*/
