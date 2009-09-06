@@ -2,19 +2,26 @@
 
 MadServer::MadServer(){
 
-	timer.setInterval(50);
-	timer.setSingleShot(false);
 
-	madNet.start();
-	madShooter.start();
-	connect(&timer,SIGNAL(timeout()),&madShooter,SLOT(makeScreenShot()));
-	connect(&madShooter,SIGNAL(sendBuffer(QByteArray*)),&madNet,SLOT(sendBuffer(QByteArray*)),Qt::QueuedConnection);
 
-	QObject::connect(&madNet,SIGNAL(connectionStart()),this,SLOT(startGrab()));
+	
+	thread1.start();
 
+	
+
+	
+	
+	//QObject::connect(&madNet,SIGNAL(connectionStart()),this,SLOT(startGrab()));
+	
 
 }
 
 void MadServer::startGrab(){
 	timer.start();
+}
+	timer1.start();
+}
+void MadServer::stats(){
+	qDebug() << madShooter->count/5;
+	madShooter->count=0;
 }

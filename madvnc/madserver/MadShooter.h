@@ -10,26 +10,26 @@
 #include <QThread>
 #include <QPixmap>
 
-class MadShooter: public QThread{
+class MadShooter: public QObject{
 Q_OBJECT
 public:
 	MadShooter();
-	static const qint16 ALL_PIC=1000000;
+	
 
-private slots:
-	void makeScreenShot();
 protected:
 	void run();
 
 signals:
-	void sendBuffer(QByteArray*);
+	void sendImage(QImage&,QImage&);
+
+public slots:
+		void makeScreenShoot();
 
 public:
-	
+	volatile int count;
 private:
-	QImage img,oldimg;
+	QImage img1,img2;
 	
-	QByteArray *buffer;
 };
 
 #endif /* MADSHOOTER_H_ */
