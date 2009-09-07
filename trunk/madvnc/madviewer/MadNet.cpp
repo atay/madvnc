@@ -11,10 +11,10 @@ void MadNet::run(){
 void MadNet::connect(QString address){
 
     socket.connectToHost(address, 7777);
-    qDebug("trying to connect..");
+    qDebug("Trying to connect..");
 }
 
 void MadNet::disconnect(){
     socket.disconnectFromHost();
-    qDebug("disconnected");
+    qDebug("Disconnected..");
 }
