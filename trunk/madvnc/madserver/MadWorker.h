@@ -17,10 +17,12 @@ Q_OBJECT
 
 public:
 	static const qint16 ALL_PIC=1000000;
+	static const qint16 PODZIAL=16;
 	MadWorker();
 
 public slots:
 	void getImage(QImage&,QImage&);
+	void stopingWorking();
 
 signals:
 	void sendBuffer(QByteArray*);
@@ -30,6 +32,7 @@ signals:
 public:
 	QImage *oldimg;
 	QByteArray *buffer;
+	bool stoped;
 
 
 };

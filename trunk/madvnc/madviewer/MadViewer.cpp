@@ -104,15 +104,17 @@ void MadViewer::drawImage() {
 	
 	stream >> lines2read;
 
+	quint16 ilosc = img.height()/PODZIAL;
+	quint16 bpl = img.bytesPerLine();
+	QImage tempimg = QImage(1024,ilosc,QImage::Format_ARGB32);
 
-	QImage tempimg = QImage(1024,1,QImage::Format_ARGB32);
 	if (lines2read==ALL_PIC){
 		stream >> img;
 	} else {
 		for (int i=0;i<lines2read;i++){
 			stream >> line;
 			stream >> tempimg;
-			memcpy(img.scanLine(line),tempimg.bits(),img.bytesPerLine());
+			memcpy(img.bits()+line*ilosc*bpl,tempimg.bits(),bpl*ilosc);
 		}
 	}
 

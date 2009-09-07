@@ -12,6 +12,7 @@ class MadViewer: public QDialog {
 
     QLineEdit *addressEdit;
     static const qint16 ALL_PIC=1000000;
+	static const qint16 PODZIAL=16;
 
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);

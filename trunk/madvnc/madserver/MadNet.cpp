@@ -12,6 +12,7 @@ MadNet::MadNet(){
 	connect(&server,SIGNAL(newConnection()),this,SLOT(prepareClient()));
 	
 	
+	
 }
 
 void MadNet::bytesWrite(qint64 size){
@@ -22,7 +23,13 @@ void MadNet::prepareClient() {
 	server.close();
 	emit connectionStart();
 	connect(client,SIGNAL(bytesWritten(qint64)),this,SLOT(bytesWrite(qint64)));
+	connect(client,SIGNAL(disconnected()),this,SLOT(disconnectClient()));
 	//qDebug() << "connected";
+}
+
+void MadNet::disconnectClient(){
+	server.listen(QHostAddress::Any,7777);
+	emit stopWorking();
 }
 
 void MadNet::sendBuffer(QByteArray *buffer) {
