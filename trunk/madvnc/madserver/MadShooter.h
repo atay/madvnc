@@ -28,8 +28,10 @@ public slots:
 
 public:
 	volatile int count;
+	bool stoped;
 private:
 	QImage img1,img2;
+	
 	
 };
 

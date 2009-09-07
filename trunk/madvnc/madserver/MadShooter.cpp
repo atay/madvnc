@@ -11,8 +11,10 @@
 
 MadShooter::MadShooter(){
 	count=0;
+	stoped=true;
 }
 void MadShooter::makeScreenShoot(){
+	if (!stoped)
 	if ((count%2)==0){
 		img1 = QPixmap::grabWindow(QApplication::desktop()->winId()).scaled(
                         QSize(1024, 640), Qt::KeepAspectRatio, Qt::SmoothTransformation).toImage();
@@ -29,5 +31,6 @@ void MadShooter::makeScreenShoot(){
 void MadShooter::stopingWorking(){
 	img1=QImage();
 	img2=QImage();
+	stoped=true;
 	qDebug() << "shooter stoped";
 }

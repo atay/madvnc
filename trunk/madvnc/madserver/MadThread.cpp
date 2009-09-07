@@ -26,8 +26,10 @@ void MadThread::run(){
 }
 
 void MadThread::startGrab(){
-	emit startShooting();
 	madWorker->stoped=false;
+	madShooter->stoped=false;
+	emit startShooting();
+	
 	timer1.start();
 }
 void MadThread::stats(){
