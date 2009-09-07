@@ -24,6 +24,7 @@ signals:
 
 public slots:
 		void makeScreenShoot();
+		void stopingWorking();
 
 public:
 	volatile int count;
