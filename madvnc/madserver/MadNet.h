@@ -29,6 +29,8 @@ public slots:
 	void bytesWrite(qint64);
 	void disconnectClient();
 
+        void receiveControls();
+
 signals:
 	void connectionStart();
 	void stopWorking();
@@ -39,6 +41,8 @@ private:
 
 	QTcpSocket *client;
 	QTcpServer server;
+
+        QDataStream controls;
 
 };
 
