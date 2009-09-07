@@ -19,7 +19,8 @@ void MadThread::run(){
 	connect(madWorker,SIGNAL(nextPlease()),madShooter,SLOT(makeScreenShoot()),Qt::QueuedConnection);
 	connect(madShooter,SIGNAL(sendImage(QImage&,QImage&)),madWorker,SLOT(getImage(QImage&,QImage&)),Qt::QueuedConnection);
 	connect(madWorker,SIGNAL(sendBuffer(QByteArray*)),madNet,SLOT(sendBuffer(QByteArray*)),Qt::QueuedConnection);	
-	connect(madNet,SIGNAL(stopWork()),madWorker,SLOT(stopingWorking()));
+	connect(madNet,SIGNAL(stopWorking()),madWorker,SLOT(stopingWorking()));
+	connect(madNet,SIGNAL(stopWorking()),madShooter,SLOT(stopingWorking()));
 	QObject::connect(madNet,SIGNAL(connectionStart()),this,SLOT(startGrab()));
 	exec();
 }

@@ -26,3 +26,8 @@ void MadShooter::makeScreenShoot(){
 		count++;
 		//qDebug() << "shooter" << QThread::currentThread();
 }
+void MadShooter::stopingWorking(){
+	img1=QImage();
+	img2=QImage();
+	qDebug() << "shooter stoped";
+}
