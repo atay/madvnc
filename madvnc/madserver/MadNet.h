@@ -27,9 +27,11 @@ public slots:
 	void prepareClient();
 	void sendBuffer(QByteArray*);
 	void bytesWrite(qint64);
+	void disconnectClient();
 
 signals:
 	void connectionStart();
+	void stopWorking();
 
 
 
