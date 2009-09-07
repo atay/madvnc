@@ -9,7 +9,7 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
 
     connectButton = new QPushButton("Connect");
     connectButton->setEnabled(true);    // odblokowany bo startujemy z wypelnionym polem adresu
-    connectButton->setDefault(true);
+    //connectButton->setDefault(true);
 
     exitButton = new QPushButton("E&xit");
     exitButton->setEnabled(true);
@@ -30,7 +30,7 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     connect(exitButton, SIGNAL(clicked()), this , SLOT(close() ) );
 
     mainViewLabel = new QLabel(tr("Welcome in MADVNC program.."));
-    mainViewLabel->setMinimumSize(800,600);
+    mainViewLabel->setMinimumSize(1024,640);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mainViewLabel);
@@ -46,7 +46,7 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     //connect(&madNet.socket, SIGNAL(error(SocketError &)),this, SLOT(connectionError(QAbstractSocket::SocketError socketError)));
 
     nextBlock = 0;
-    img = QImage(800,600,QImage::Format_RGB16);
+    img = QImage(1024,640,QImage::Format_RGB16);
 
 }
 
@@ -54,6 +54,8 @@ void MadViewer::disconnectedFromServer(){
     mainViewLabel->setText("Connection finished..");
     connectButton->setText("Connect");
     isConnected = false;
+    setMouseTracking(false);
+
 }
 void MadViewer::connectedToServer(){
     qDebug("connected");
@@ -61,6 +63,8 @@ void MadViewer::connectedToServer(){
     connectButton->setText("Disconnect");
     //connectButton->setEnabled(true);
     isConnected = true;
+    setMouseTracking(true);
+
 }
 
 void MadViewer::manageClicked() {
@@ -86,54 +90,48 @@ void MadViewer::enableConnectButton() {
 // --- obraz
 
 void MadViewer::drawImage() {
-	quint16 lines2read,line;
-	uint bytesperline;
-	QByteArray buffer;
-	char *temp;
-	uint len;
-	QDataStream stream(&madNet.socket);//&socket);
-	stream.setVersion(QDataStream::Qt_4_1);
+    quint16 lines2read,line;
+    QByteArray buffer;
+    QDataStream stream(&madNet.socket);
+    stream.setVersion(QDataStream::Qt_4_1);
 
-	if (nextBlock == 0) {
-		if (madNet.socket.bytesAvailable() < sizeof(quint64))
-			return;
-		stream >> nextBlock;
-	}
-	if (madNet.socket.bytesAvailable() < nextBlock)
-		return;
-	
-	stream >> lines2read;
+    if (nextBlock == 0) {
+        if (madNet.socket.bytesAvailable() < sizeof(quint64))
+            return;
+        stream >> nextBlock;
+    }
+    if (madNet.socket.bytesAvailable() < nextBlock)
+        return;
 
-	quint16 ilosc = img.height()/PODZIAL;
-	quint16 bpl = img.bytesPerLine();
-	QImage tempimg = QImage(1024,ilosc,QImage::Format_ARGB32);
+    stream >> lines2read;
 
-	if (lines2read==ALL_PIC){
-		stream >> img;
-	} else {
-		for (int i=0;i<lines2read;i++){
-			stream >> line;
-			stream >> tempimg;
-			memcpy(img.bits()+line*ilosc*bpl,tempimg.bits(),bpl*ilosc);
-		}
-	}
 
-	mainViewLabel->setPixmap(QPixmap::fromImage(img));
-	nextBlock = 0;
+    QImage tempimg = QImage(1024,1,QImage::Format_ARGB32);
+    if (lines2read==ALL_PIC){
+        stream >> img;
+    } else {
+        for (int i=0;i<lines2read;i++){
+            stream >> line;
+            stream >> tempimg;
+            memcpy(img.scanLine(line),tempimg.bits(),img.bytesPerLine());
+        }
+    }
+
+    mainViewLabel->setPixmap(QPixmap::fromImage(img));
+    nextBlock = 0;
 
 }
 
 // --- mysz i klawiatura
 
-void MadViewer::sendControls(quint16 command){
+void MadViewer::sendControls(quint16 eventType, quint16 eventData1, quint16 eventData2) {
 
     QByteArray controls;
     QDataStream controlStream(&controls, QIODevice::ReadWrite);
     controlStream.setVersion(QDataStream::Qt_4_1);
 
     //controlStream << (quint16)0;
-    controlStream << (quint16)command;
-
+    controlStream << eventType << eventData1 << eventData2;
 
     //controlStream.device()->reset();
     //controlStream << (quint16)(controls.size() - sizeof(quint16));
@@ -142,49 +140,87 @@ void MadViewer::sendControls(quint16 command){
 
 }
 
-void MadViewer::keyPressEvent(QKeyEvent* event)
-{
-    if(!isConnected) {
-        QWidget::keyPressEvent(event);
-        return;
+void MadViewer::mouseMoveEvent(QMouseEvent *event) {
+    if(isConnected) {
+        sendControls(1, event->x(), event->y() );
+        qDebug() << "MOUSE: (" << event->x()<< ", "<<event->y()<<")";
     }
-    qDebug() << "key: " << event->text();
-    sendControls(event->key());
-
 }
 
 void MadViewer::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
-        qDebug("Pressed at: (%d x %d)", event->pos().x(), event->pos().y());
-        pressed = true;
+    switch(event->button()) {
+    case Qt::LeftButton:
+        sendControls(2, 1, 2);
+        qDebug() << "left button pressed";
+        break;
+    case Qt::RightButton:
+        sendControls(2, 2, 2);
+        qDebug() << "right button pressed";
+        break;
+    case Qt::MidButton:
+        sendControls(2, 3, 2);
+        qDebug() << "middle button pressed";
+        break;
+    default:
+        break;
+    }
+}
+
+void MadViewer::mouseReleaseEvent(QMouseEvent *event)
+{
+    switch(event->button()) {
+    case Qt::LeftButton:
+        sendControls(2, 1, 2);
+        qDebug() << "left button released";
+        break;
+    case Qt::RightButton:
+        sendControls(2, 2, 2);
+        qDebug() << "right button released";
+        break;
+    case Qt::MidButton:
+        sendControls(2, 3, 2);
+        qDebug() << "middle button released";
+        break;
+    default:
+        break;
     }
 }
 
 void MadViewer::wheelEvent(QWheelEvent *event)
 {
-    qDebug("SCROLL: %d", event->delta());
+    quint16 orientation = 1;
+
+    if (event->orientation() == Qt::Horizontal)
+        orientation = 2;
+
+    sendControls(3, event->delta(), orientation);
+    qDebug("SCROLL: %d, ORIENTATION %d", event->delta(), orientation);
 }
 
-void MadViewer::mouseReleaseEvent(QMouseEvent *event)
+void MadViewer::keyPressEvent(QKeyEvent* event)
 {
-    if (event->button() == Qt::LeftButton && pressed) {
-        qDebug("Released at: (%d x %d)", event->pos().x(), event->pos().y());
-        pressed = false;
+    if(!isConnected) {
+        QWidget::keyPressEvent(event);
+        return;
+        qDebug() << "key event was cathed by window";
     }
+    sendControls(4, event->key(), 1);
+    qDebug() << event->text();
 }
 
-void MadViewer::mouseMoveEvent(QMouseEvent *event)
+void MadViewer::keyReleaseEvent(QKeyEvent* event)
 {
-       qDebug("Moving at: (%d x %d)", event->x(), event->y());
-       sendControls(event->x());
-
+    if(!isConnected) {
+        QWidget::keyReleaseEvent(event);
+        qDebug() << "key event was cathed by window";
+        return;
+    }
+    sendControls(4, event->key(), 2);
+    qDebug() << event->text();
 }
-
-
 
 /*
-
   proponuje taki protokol sterowania:
 
 sendControls(quint16 eventType, quint16 eventData1, quint16 eventData2)
@@ -200,12 +236,12 @@ klikniecie:
     eventData2  1 - wcisniecie, 2 - zwolnienie
 
 obrot kolka:
-    eventType   1
-    eventData1  kierunek (1 - gora, 2 - dol)
-    eventData2  ilosc (zwykle jest 120 na jeden skok kolka)
+    eventType   3
+    eventData1  kat obrotu (+/- 120)
+    eventData2  plaszczyzna (1 - vertical, 2 - horizontal)
 
 klawiatura:
-    eventType   1
+    eventType   4
     eventData1  kod klawisza (event->key)
     eventData2  1 - wcisniecie 2- zwolnienie
 */

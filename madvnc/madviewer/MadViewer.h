@@ -19,6 +19,7 @@ class MadViewer: public QDialog {
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
     void keyPressEvent(QKeyEvent * event);
+    void keyReleaseEvent(QKeyEvent * event);
 
 public:
     MadViewer(QWidget *parent = 0);
@@ -30,7 +31,7 @@ public slots:
     void disconnectedFromServer();
 
     void drawImage();
-    void sendControls(quint16);
+    void sendControls(quint16, quint16, quint16);
 
 private:
     MadNet madNet;
