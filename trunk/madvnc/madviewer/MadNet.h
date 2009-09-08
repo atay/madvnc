@@ -3,14 +3,16 @@
 
 #include <QTcpSocket>
 #include <QThread>
+#include <QtGui>
 
 //class QThread;
+
 class MadNet: public QThread{
 
     Q_OBJECT
 
 public:
-    MadNet(QObject *parent = 0);
+    MadNet(QObject *parent =0);
     QTcpSocket socket;
 
 private:
@@ -21,6 +23,9 @@ protected:
 public slots:
     void connect(QString);
     void disconnect();
+	void sendMouseEvent(QMouseEvent);
+	void sendKeyEvent(QKeyEvent);
+	void sendWheelEvent(QWheelEvent);
 
 };
 

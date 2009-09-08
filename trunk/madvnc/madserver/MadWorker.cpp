@@ -37,7 +37,7 @@ void MadWorker::getImage(QImage &newer,QImage& older){
 			stream<<quint16(0); //przyszla ilosc lini do wyslania
 			quint16 ilosc = newer.height()/PODZIAL;
 			quint16 bpl = newer.bytesPerLine();
-			QImage tempimg = QImage(1024,ilosc,QImage::Format_ARGB32);
+			QImage tempimg = QImage(1280,ilosc,QImage::Format_ARGB32);
 			for (int i=0;i<PODZIAL;i++){
 				oldptr=older.bits()+i*ilosc*bpl;
 				imgptr=newer.bits()+i*ilosc*bpl;

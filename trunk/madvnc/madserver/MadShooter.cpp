@@ -16,13 +16,11 @@ MadShooter::MadShooter(){
 void MadShooter::makeScreenShoot(){
 	if (!stoped)
 	if ((count%2)==0){
-		img1 = QPixmap::grabWindow(QApplication::desktop()->winId()).scaled(
-                        QSize(1024, 640), Qt::KeepAspectRatio, Qt::SmoothTransformation).toImage();
+		img1 = QPixmap::grabWindow(QApplication::desktop()->winId()).toImage();
 		emit sendImage(img1,img2);
 
 	} else {
-		img2 = QPixmap::grabWindow(QApplication::desktop()->winId()).scaled(
-                        QSize(1024, 640), Qt::KeepAspectRatio, Qt::SmoothTransformation).toImage();
+		img2 = QPixmap::grabWindow(QApplication::desktop()->winId()).toImage();
 		emit sendImage(img2,img1);
 	}
 		count++;

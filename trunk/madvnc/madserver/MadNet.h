@@ -41,8 +41,8 @@ private:
 
 	QTcpSocket *client;
 	QTcpServer server;
-
-        QDataStream controls;
+	qint16 nextBlock;
+    QDataStream controls;
 
 };
 
