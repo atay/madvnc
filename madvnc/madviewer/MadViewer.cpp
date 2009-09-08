@@ -90,35 +90,40 @@ void MadViewer::enableConnectButton() {
 // --- obraz
 
 void MadViewer::drawImage() {
-    quint16 lines2read,line;
-    QByteArray buffer;
-    QDataStream stream(&madNet.socket);
-    stream.setVersion(QDataStream::Qt_4_1);
+	quint16 lines2read,line;
+	uint bytesperline;
+	QByteArray buffer;
+	char *temp;
+	uint len;
+	QDataStream stream(&madNet.socket);//&socket);
+	stream.setVersion(QDataStream::Qt_4_1);
 
-    if (nextBlock == 0) {
-        if (madNet.socket.bytesAvailable() < sizeof(quint64))
-            return;
-        stream >> nextBlock;
-    }
-    if (madNet.socket.bytesAvailable() < nextBlock)
-        return;
+	if (nextBlock == 0) {
+		if (madNet.socket.bytesAvailable() < sizeof(quint64))
+			return;
+		stream >> nextBlock;
+	}
+	if (madNet.socket.bytesAvailable() < nextBlock)
+		return;
+	
+	stream >> lines2read;
 
-    stream >> lines2read;
+	quint16 ilosc = img.height()/PODZIAL;
+	quint16 bpl = img.bytesPerLine();
+	QImage tempimg = QImage(1024,ilosc,QImage::Format_ARGB32);
 
+	if (lines2read==ALL_PIC){
+		stream >> img;
+	} else {
+		for (int i=0;i<lines2read;i++){
+			stream >> line;
+			stream >> tempimg;
+			memcpy(img.bits()+line*ilosc*bpl,tempimg.bits(),bpl*ilosc);
+		}
+	}
 
-    QImage tempimg = QImage(1024,1,QImage::Format_ARGB32);
-    if (lines2read==ALL_PIC){
-        stream >> img;
-    } else {
-        for (int i=0;i<lines2read;i++){
-            stream >> line;
-            stream >> tempimg;
-            memcpy(img.scanLine(line),tempimg.bits(),img.bytesPerLine());
-        }
-    }
-
-    mainViewLabel->setPixmap(QPixmap::fromImage(img));
-    nextBlock = 0;
+	mainViewLabel->setPixmap(QPixmap::fromImage(img));
+	nextBlock = 0;
 
 }
 
