@@ -14,8 +14,9 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     exitButton = new QPushButton("E&xit");
     exitButton->setEnabled(true);
 
-    addressEdit = new QLineEdit("localhost");
+    addressEdit = new QLineEdit("192.168.137.1");
     addressLabel = new QLabel("MadServer &address :");
+	statusLabel = new QLabel("App started");
     addressLabel->setBuddy(addressEdit);
 
     QHBoxLayout *controls = new QHBoxLayout;
@@ -29,12 +30,13 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     connect(connectButton, SIGNAL(clicked()), this, SLOT( manageClicked() ));
     connect(exitButton, SIGNAL(clicked()), this , SLOT(close() ) );
 
-    mainViewLabel = new QLabel(tr("Welcome in MADVNC program.."));
-    mainViewLabel->setMinimumSize(1024,640);
+    mainViewLabel = new QLabel(this);
+    mainViewLabel->setMinimumSize(1280,800);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mainViewLabel);
     layout->addLayout(controls);
+	layout->addWidget(statusLabel);
     setLayout(layout);
 
     setFixedHeight(sizeHint().height());
@@ -43,10 +45,13 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     connect(&madNet.socket, SIGNAL(readyRead()),     this, SLOT(drawImage()));
     connect(&madNet.socket, SIGNAL(connected()),     this, SLOT(connectedToServer()));
     connect(&madNet.socket, SIGNAL(disconnected()),  this, SLOT(disconnectedFromServer()));
+	connect(this, SIGNAL(newMouseEvent(QMouseEvent)),  &madNet, SLOT(sendMouseEvent(QMouseEvent)));
+	connect(this, SIGNAL(newKeyEvent(QMouseEvent)),  &madNet, SLOT(sendKeyEvent(QMouseEvent)));
+	connect(this, SIGNAL(newWheelEvent(QMouseEvent)),  &madNet, SLOT(sendWheelEvent(QMouseEvent)));
     //connect(&madNet.socket, SIGNAL(error(SocketError &)),this, SLOT(connectionError(QAbstractSocket::SocketError socketError)));
 
     nextBlock = 0;
-    img = QImage(1024,640,QImage::Format_RGB16);
+    img = QImage(1280,800,QImage::Format_RGB16);
 
 }
 
@@ -55,6 +60,7 @@ void MadViewer::disconnectedFromServer(){
     connectButton->setText("Connect");
     isConnected = false;
     setMouseTracking(false);
+	mainViewLabel->setMouseTracking(false);
 
 }
 void MadViewer::connectedToServer(){
@@ -64,6 +70,7 @@ void MadViewer::connectedToServer(){
     //connectButton->setEnabled(true);
     isConnected = true;
     setMouseTracking(true);
+	mainViewLabel->setMouseTracking(true);
 
 }
 
@@ -110,7 +117,7 @@ void MadViewer::drawImage() {
 
 	quint16 ilosc = img.height()/PODZIAL;
 	quint16 bpl = img.bytesPerLine();
-	QImage tempimg = QImage(1024,ilosc,QImage::Format_ARGB32);
+	QImage tempimg = QImage(1280,ilosc,QImage::Format_ARGB32);
 
 	if (lines2read==ALL_PIC){
 		stream >> img;
@@ -135,94 +142,45 @@ void MadViewer::sendControls(quint16 eventType, quint16 eventData1, quint16 even
     QDataStream controlStream(&controls, QIODevice::ReadWrite);
     controlStream.setVersion(QDataStream::Qt_4_1);
 
-    //controlStream << (quint16)0;
+    controlStream << quint16(sizeof(quint16)*3);
     controlStream << eventType << eventData1 << eventData2;
 
     //controlStream.device()->reset();
     //controlStream << (quint16)(controls.size() - sizeof(quint16));
     QTcpSocket * serwer = &madNet.socket;
-    serwer->write(controls.data(), controls.size());
+    //serwer->write(controls);
 
 }
 
 void MadViewer::mouseMoveEvent(QMouseEvent *event) {
-    if(isConnected) {
-        sendControls(1, event->x(), event->y() );
-        qDebug() << "MOUSE: (" << event->x()<< ", "<<event->y()<<")";
-    }
+	statusLabel->setText(QString("mouse move: x: "+QString::number(event->pos().x())+", y: "+QString::number(event->pos().y())));
+	
+	emit newMouseEvent(*event);
 }
 
 void MadViewer::mousePressEvent(QMouseEvent *event)
 {
-    switch(event->button()) {
-    case Qt::LeftButton:
-        sendControls(2, 1, 2);
-        qDebug() << "left button pressed";
-        break;
-    case Qt::RightButton:
-        sendControls(2, 2, 2);
-        qDebug() << "right button pressed";
-        break;
-    case Qt::MidButton:
-        sendControls(2, 3, 2);
-        qDebug() << "middle button pressed";
-        break;
-    default:
-        break;
-    }
+	emit newMouseEvent(*event);
 }
 
 void MadViewer::mouseReleaseEvent(QMouseEvent *event)
 {
-    switch(event->button()) {
-    case Qt::LeftButton:
-        sendControls(2, 1, 2);
-        qDebug() << "left button released";
-        break;
-    case Qt::RightButton:
-        sendControls(2, 2, 2);
-        qDebug() << "right button released";
-        break;
-    case Qt::MidButton:
-        sendControls(2, 3, 2);
-        qDebug() << "middle button released";
-        break;
-    default:
-        break;
-    }
+	emit newMouseEvent(*event);
 }
 
 void MadViewer::wheelEvent(QWheelEvent *event)
 {
-    quint16 orientation = 1;
-
-    if (event->orientation() == Qt::Horizontal)
-        orientation = 2;
-
-    sendControls(3, event->delta(), orientation);
-    qDebug("SCROLL: %d, ORIENTATION %d", event->delta(), orientation);
+    emit newWheelEvent(*event);
 }
 
 void MadViewer::keyPressEvent(QKeyEvent* event)
 {
-    if(!isConnected) {
-        QWidget::keyPressEvent(event);
-        return;
-        qDebug() << "key event was cathed by window";
-    }
-    sendControls(4, event->key(), 1);
-    qDebug() << event->text();
+    emit newKeyEvent(*event);
 }
 
 void MadViewer::keyReleaseEvent(QKeyEvent* event)
 {
-    if(!isConnected) {
-        QWidget::keyReleaseEvent(event);
-        qDebug() << "key event was cathed by window";
-        return;
-    }
-    sendControls(4, event->key(), 2);
-    qDebug() << event->text();
+    emit newKeyEvent(*event);
 }
 
 /*

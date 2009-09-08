@@ -23,6 +23,11 @@ class MadViewer: public QDialog {
 
 public:
     MadViewer(QWidget *parent = 0);
+	QLabel *addressLabel, *mainViewLabel, *statusLabel;
+signals:
+	void newMouseEvent(QMouseEvent);
+	void newKeyEvent(QKeyEvent);
+	void newWheelEvent(QWheelEvent);
 
 public slots:
     void manageClicked();
@@ -36,7 +41,7 @@ public slots:
 private:
     MadNet madNet;
     QPushButton *connectButton, *exitButton;
-    QLabel *addressLabel, *mainViewLabel;
+	
     QImage img;
     QByteArray *buffer;
     qint64 nextBlock;
