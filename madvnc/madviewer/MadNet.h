@@ -23,9 +23,8 @@ protected:
 public slots:
     void connect(QString);
     void disconnect();
-	void sendMouseEvent(QMouseEvent);
-	void sendKeyEvent(QKeyEvent);
-	void sendWheelEvent(QWheelEvent);
+	void sendMouseEvent(QMouseEvent *);
+	void sendKeyEvent(QKeyEvent*);
 
 };
 

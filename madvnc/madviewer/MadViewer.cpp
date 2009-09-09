@@ -1,6 +1,7 @@
 #include <QtGui>
 #include <QtNetwork>
 #include "MadViewer.h"
+#include "MadLabel.h"
 
 MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
 
@@ -30,8 +31,9 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     connect(connectButton, SIGNAL(clicked()), this, SLOT( manageClicked() ));
     connect(exitButton, SIGNAL(clicked()), this , SLOT(close() ) );
 
-    mainViewLabel = new QLabel(this);
+    mainViewLabel = new MadLabel(this);
     mainViewLabel->setMinimumSize(1280,800);
+	//mainViewLabel->setFocusPolicy(Qt::StrongFocus);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mainViewLabel);
@@ -45,10 +47,11 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     connect(&madNet.socket, SIGNAL(readyRead()),     this, SLOT(drawImage()));
     connect(&madNet.socket, SIGNAL(connected()),     this, SLOT(connectedToServer()));
     connect(&madNet.socket, SIGNAL(disconnected()),  this, SLOT(disconnectedFromServer()));
-	connect(this, SIGNAL(newMouseEvent(QMouseEvent)),  &madNet, SLOT(sendMouseEvent(QMouseEvent)));
-	connect(this, SIGNAL(newKeyEvent(QMouseEvent)),  &madNet, SLOT(sendKeyEvent(QMouseEvent)));
-	connect(this, SIGNAL(newWheelEvent(QMouseEvent)),  &madNet, SLOT(sendWheelEvent(QMouseEvent)));
-    //connect(&madNet.socket, SIGNAL(error(SocketError &)),this, SLOT(connectionError(QAbstractSocket::SocketError socketError)));
+	connect(mainViewLabel, SIGNAL(newMouseEvent(QMouseEvent*)),  &madNet, SLOT(sendMouseEvent(QMouseEvent*)));
+	connect(mainViewLabel, SIGNAL(newKeyEvent(QKeyEvent*)),  &madNet, SLOT(sendKeyEvent(QKeyEvent*)));
+	connect(mainViewLabel, SIGNAL(setStatus(const QString&)),  statusLabel, SLOT(setText(const QString &)));
+	connect(this, SIGNAL(setStatus(const QString&)),  statusLabel, SLOT(setText(const QString &)));
+	
 
     nextBlock = 0;
     img = QImage(1280,800,QImage::Format_RGB16);
@@ -61,6 +64,8 @@ void MadViewer::disconnectedFromServer(){
     isConnected = false;
     setMouseTracking(false);
 	mainViewLabel->setMouseTracking(false);
+	mainViewLabel->setFocusPolicy(Qt::StrongFocus);
+	addressEdit->setDisabled(false);
 
 }
 void MadViewer::connectedToServer(){
@@ -71,6 +76,11 @@ void MadViewer::connectedToServer(){
     isConnected = true;
     setMouseTracking(true);
 	mainViewLabel->setMouseTracking(true);
+	connectButton->setDefault(false);
+	connectButton->clearFocus();
+	mainViewLabel->setFocus();
+	addressEdit->setDisabled(true);
+	this->setFocusProxy(mainViewLabel);
 
 }
 
@@ -134,77 +144,6 @@ void MadViewer::drawImage() {
 
 }
 
-// --- mysz i klawiatura
-
-void MadViewer::sendControls(quint16 eventType, quint16 eventData1, quint16 eventData2) {
-
-    QByteArray controls;
-    QDataStream controlStream(&controls, QIODevice::ReadWrite);
-    controlStream.setVersion(QDataStream::Qt_4_1);
-
-    controlStream << quint16(sizeof(quint16)*3);
-    controlStream << eventType << eventData1 << eventData2;
-
-    //controlStream.device()->reset();
-    //controlStream << (quint16)(controls.size() - sizeof(quint16));
-    QTcpSocket * serwer = &madNet.socket;
-    //serwer->write(controls);
-
-}
-
-void MadViewer::mouseMoveEvent(QMouseEvent *event) {
-	statusLabel->setText(QString("mouse move: x: "+QString::number(event->pos().x())+", y: "+QString::number(event->pos().y())));
+void MadViewer::keyPressEvent ( QKeyEvent * event){
 	
-	emit newMouseEvent(*event);
 }
-
-void MadViewer::mousePressEvent(QMouseEvent *event)
-{
-	emit newMouseEvent(*event);
-}
-
-void MadViewer::mouseReleaseEvent(QMouseEvent *event)
-{
-	emit newMouseEvent(*event);
-}
-
-void MadViewer::wheelEvent(QWheelEvent *event)
-{
-    emit newWheelEvent(*event);
-}
-
-void MadViewer::keyPressEvent(QKeyEvent* event)
-{
-    emit newKeyEvent(*event);
-}
-
-void MadViewer::keyReleaseEvent(QKeyEvent* event)
-{
-    emit newKeyEvent(*event);
-}
-
-/*
-  proponuje taki protokol sterowania:
-
-sendControls(quint16 eventType, quint16 eventData1, quint16 eventData2)
-
-ruch myszy:
-    eventType   1
-    eventData1  polozenieX ( >= 0 )
-    eventData2  polozenieY ( >= 0 )
-
-klikniecie:
-    eventType   2
-    eventData1  1 - lewy przycisk, 2 - prawy przycisk itd..
-    eventData2  1 - wcisniecie, 2 - zwolnienie
-
-obrot kolka:
-    eventType   3
-    eventData1  kat obrotu (+/- 120)
-    eventData2  plaszczyzna (1 - vertical, 2 - horizontal)
-
-klawiatura:
-    eventType   4
-    eventData1  kod klawisza (event->key)
-    eventData2  1 - wcisniecie 2- zwolnienie
-*/
