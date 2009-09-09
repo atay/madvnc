@@ -28,11 +28,12 @@ public slots:
 	void sendBuffer(QByteArray*);
 	void bytesWrite(qint64);
 	void disconnectClient();
+	void stopingWorking();
 
         void receiveControls();
 
 signals:
-	void connectionStart();
+	void connectionStart(const QString &);
 	void stopWorking();
 
 

@@ -12,6 +12,7 @@
 #include "MadShooter.h"
 #include "MadNet.h"
 #include "MadWorker.h"
+#include "MadTray.h"
 
 class MadThread: public QThread{
 Q_OBJECT
@@ -22,12 +23,15 @@ public:
 	MadNet *madNet;
 	MadWorker * madWorker;
 	QTimer timer, timer1;
+	MadTray madTray;
 protected:
 	void run();
 signals:
 	void startShooting();
+	void stopWorking();
 public slots:
 	void startGrab();
+	void stopingWorking();
 	void stats();
 };
 #endif 

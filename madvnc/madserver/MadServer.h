@@ -13,11 +13,12 @@
 #include "MadShooter.h"
 #include "MadThread.h"
 #include <QTimer>
+#include <QtGui>
 
 
 
 
-class MadServer: public QObject{
+class MadServer: public QWidget{
 Q_OBJECT
 
 public:
@@ -34,7 +35,11 @@ private:
 	MadShooter *madShooter;
 	MadNet *madNet;
 	QTimer timer,timer1;
-	MadThread thread1,thread2;
+	MadThread madThread;
+	QSystemTrayIcon *trayIcon;
+	QAction *quitAction,*disconnectAction,*onOffAction,*addressAction;
+	QMenu *trayIconMenu;
+	QIcon icon;
 
 };
 
