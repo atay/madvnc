@@ -1,24 +1,12 @@
 #include "MadServer.h"
 
 MadServer::MadServer(){
-
-
-
 	
-	thread1.start();
-
-	
-
-	
-	
-	//QObject::connect(&madNet,SIGNAL(connectionStart()),this,SLOT(startGrab()));
-	
-
+	madThread.start();
 }
 
 void MadServer::startGrab(){
 	timer.start();
-
 	timer1.start();
 }
 void MadServer::stats(){
