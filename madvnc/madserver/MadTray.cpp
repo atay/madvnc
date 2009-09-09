@@ -8,15 +8,13 @@ MadTray::MadTray(){
 	quitAction = new QAction(trUtf8("&Close"), this);
 	disconnectAction = new QAction(trUtf8("&Disconnect"), this);
 	disconnectAction->setDisabled(true);
-	onOffAction = new QAction(trUtf8("&Suspend"), this);
-	onOffAction->setCheckable(true);
 	addressAction = new QAction(trUtf8("Not Connected"), this);
 	addressAction->setDisabled(true);
 	connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
-	//connect(disconnectAction, SIGNAL(triggered()), th, SLOT(quit()));
+	connect(disconnectAction, SIGNAL(triggered()), this, SIGNAL(stopWorking()));
+	connect(disconnectAction, SIGNAL(triggered()), this, SLOT(stopingWorking()));
 	trayIconMenu->addAction(addressAction);
 	trayIconMenu->addSeparator();
-	trayIconMenu->addAction(onOffAction);
 	trayIconMenu->addAction(disconnectAction);
 	trayIconMenu->addAction(quitAction);
 	
@@ -38,9 +36,11 @@ void MadTray::showTrayTooltip(const QString &title, const QString &msg){
 void MadTray::connectionStarted(const QString & address){
 	trayIcon->showMessage("Client connected","Client from address: " + address + " was connected successfully!");
 	trayIcon->setIcon(*cIcon);
-	disconnectAction->setEnabled(true);
+	disconnectAction->setDisabled(false);
 }
 void MadTray::stopingWorking(){
+	disconnectAction->setDisabled(true);
 	trayIcon->setIcon(*dIcon);
-	trayIcon->showMessage("Client disconnected","Client was connected successfully!");
+	trayIcon->showMessage("Client disconnected","Client was disconnected successfully!");
 }
+

@@ -215,21 +215,28 @@ void MadNet::receiveControls(){
 					Input.ki.wVk = VK_ADD;
 					break;
 				case Qt::Key_Comma:	 
-					Input.ki.wVk = VK_SEPARATOR;
+					Input.ki.wVk = VK_OEM_COMMA;
 					break;
 				case Qt::Key_Minus:
 					Input.ki.wVk = VK_SUBTRACT;
 					break;
 				case Qt::Key_Period:
-					Input.ki.wVk = VK_DECIMAL;
+					Input.ki.wVk = VK_OEM_PERIOD;
 					break;
 				case Qt::Key_Slash:
 					Input.ki.wVk = VK_DIVIDE;
+					break;
+				case Qt::Key_Backslash:
+					Input.ki.wVk = VK_BACK;
+					break;
+				case Qt::Key_Colon:
+					Input.ki.wVk = VK_OEM_COMMA;
 					break;
 
 				default: 
 					Input.ki.wVk = (byte)button;
 			}
+			qDebug() << button;
 
 			Input.type = INPUT_KEYBOARD; 
 			if(type == QEvent::KeyRelease) Input.ki.dwFlags = KEYEVENTF_KEYUP;

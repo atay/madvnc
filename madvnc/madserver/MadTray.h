@@ -25,6 +25,7 @@ public slots:
 	void showTrayTooltip(const QString&,const QString&);
 	void stopingWorking();
 	void connectionStarted(const QString &);
+	
 signals:
 	void stopWorking();
 	
