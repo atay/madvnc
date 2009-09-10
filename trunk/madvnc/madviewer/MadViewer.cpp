@@ -10,7 +10,6 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
 
     connectButton = new QPushButton("Connect");
     connectButton->setEnabled(true);    // odblokowany bo startujemy z wypelnionym polem adresu
-    //connectButton->setDefault(true);
 
     exitButton = new QPushButton("E&xit");
     exitButton->setEnabled(true);
@@ -47,6 +46,7 @@ MadViewer::MadViewer(QWidget * parent) : QDialog(parent) {
     connect(&madNet.socket, SIGNAL(readyRead()),     this, SLOT(drawImage()));
     connect(&madNet.socket, SIGNAL(connected()),     this, SLOT(connectedToServer()));
     connect(&madNet.socket, SIGNAL(disconnected()),  this, SLOT(disconnectedFromServer()));
+	connect(&madNet, SIGNAL(emitError(const QString &)),  this, SIGNAL(setStatus(const QString &)));
 	connect(mainViewLabel, SIGNAL(newMouseEvent(QMouseEvent*)),  &madNet, SLOT(sendMouseEvent(QMouseEvent*)));
 	connect(mainViewLabel, SIGNAL(newKeyEvent(QKeyEvent*)),  &madNet, SLOT(sendKeyEvent(QKeyEvent*)));
 	connect(mainViewLabel, SIGNAL(setStatus(const QString&)),  statusLabel, SLOT(setText(const QString &)));
@@ -81,6 +81,7 @@ void MadViewer::connectedToServer(){
 	mainViewLabel->setFocus();
 	addressEdit->setDisabled(true);
 	this->setFocusProxy(mainViewLabel);
+	emit sendStatus("Connection estabilished!);
 
 }
 
