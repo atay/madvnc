@@ -81,7 +81,7 @@ void MadViewer::connectedToServer(){
 	mainViewLabel->setFocus();
 	addressEdit->setDisabled(true);
 	this->setFocusProxy(mainViewLabel);
-	emit sendStatus("Connection estabilished!);
+	emit setStatus("Connection estabilished!");
 
 }
 
