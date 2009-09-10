@@ -19,8 +19,11 @@ private:
 
 protected:
     void run();
+signals:
+	void emitError(const QString &);
 
 public slots:
+	void manageError(QAbstractSocket::SocketError);
     void connect(QString);
     void disconnect();
 	void sendMouseEvent(QMouseEvent *);

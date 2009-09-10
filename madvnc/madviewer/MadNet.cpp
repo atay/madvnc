@@ -5,7 +5,7 @@ MadNet::MadNet(QObject * parent){
 }
 
 void MadNet::run(){
-    exec();
+	QObject::connect(&socket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(manageError(QAbstractSocket::SocketError)));
 }
 
 void MadNet::connect(QString address){
@@ -55,4 +55,7 @@ void MadNet::sendKeyEvent(QKeyEvent * myEvent){
 	controlStream << quint16(controls.size() - sizeof(quint16));	
 
 	socket.write(controls);
+}
+void MadNet::manageError(QAbstractSocket::SocketError error){
+	emit emitError("Unable to connect (" + QString::number(error) + ")");
 }
